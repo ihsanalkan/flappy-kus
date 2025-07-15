@@ -13,14 +13,14 @@ birdOpen.src = "assets/bird-open.png";
 const birdClosed = new Image();
 birdClosed.src = "assets/bird-closed.png";
 
-// Kuş nesnesi
+// Kuş özellikleri
 let bird = {
   x: 50,
   y: 150,
   width: 40,
   height: 40,
-  gravity: 0.25,
-  lift: -6.5,
+  gravity: 0.3,
+  lift: -6,
   velocity: 0
 };
 
@@ -34,21 +34,27 @@ let isGameOver = false;
 let isFlapping = false;
 let birdAngle = 0;
 
-// Space tuşu
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space" && !isGameOver) {
+// Tıklama & Dokunma için kuşu zıplatma fonksiyonu
+function flap() {
+  if (!isGameOver) {
     bird.velocity = bird.lift;
     isFlapping = true;
   }
-});
+}
 
+// Klavye ile zıplama
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") flap();
+});
 document.addEventListener("keyup", (e) => {
-  if (e.code === "Space") {
-    isFlapping = false;
-  }
+  if (e.code === "Space") isFlapping = false;
 });
 
-// Oyun bitirme
+// Fare ve dokunma ile zıplama
+canvas.addEventListener("mousedown", flap);
+canvas.addEventListener("touchstart", flap);
+
+// Oyun bitince
 function gameOver() {
   isGameOver = true;
 
@@ -64,7 +70,7 @@ function gameOver() {
   restartBtn.style.display = "block";
 }
 
-// Yeniden başlatma
+// Oyunu yeniden başlat
 restartBtn.addEventListener("click", () => {
   score = 0;
   pipes = [];
@@ -76,7 +82,7 @@ restartBtn.addEventListener("click", () => {
   draw();
 });
 
-// Boru oluştur
+// Boru üretimi
 function addPipe() {
   let top = Math.random() * (canvas.height - gap - 100);
   pipes.push({
@@ -125,16 +131,15 @@ function draw() {
 
   // Fizik hesaplama
   bird.velocity += bird.gravity;
-  bird.velocity *= 0.98; // hava direnci
-  bird.velocity = Math.min(bird.velocity, 8); // terminal hız
+  bird.velocity *= 0.98;
+  bird.velocity = Math.min(bird.velocity, 8);
   bird.y += bird.velocity;
 
-  // Kuşun eğimi
+  // Kuş eğimi
   birdAngle = bird.velocity < 0
     ? Math.max(birdAngle - 1, -20)
     : Math.min(birdAngle + 1, 40);
 
-  // Görsel seçimi
   const currentBirdImage = isFlapping ? birdOpen : birdClosed;
 
   // Kuşu döndürerek çiz
@@ -144,13 +149,12 @@ function draw() {
   ctx.drawImage(currentBirdImage, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
   ctx.restore();
 
-  // Yerle çarpışma kontrolü
+  // Yerle çarpışma
   if (bird.y + bird.height > canvas.height || bird.y < 0) {
     gameOver();
     return;
   }
 
-  // Yeni boru ekle
   frame++;
   if (frame % pipeFrequency === 0) {
     addPipe();
@@ -158,7 +162,7 @@ function draw() {
 
   drawPipes();
 
-  // Skoru yaz
+  // Skor
   ctx.fillStyle = "white";
   ctx.font = "30px Arial";
   ctx.textAlign = "left";
