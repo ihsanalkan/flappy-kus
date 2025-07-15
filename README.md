@@ -1,2 +1,2 @@
-# flappy-ku-
+# flappy-kus
 Ejderhalı Flappy Bird oyunu
