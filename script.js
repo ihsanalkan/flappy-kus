@@ -2,7 +2,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const restartBtn = document.getElementById("restartBtn");
 
-// Arka plan
+// Arka plan görseli
 const backgroundImage = new Image();
 backgroundImage.src = "assets/dragon-bg.png";
 
@@ -14,11 +14,11 @@ birdClosed.src = "assets/bird-closed.png";
 
 // Kuş özellikleri
 let bird = {
-  x: 50,
+  x: 60,
   y: 150,
   width: 40,
   height: 40,
-  gravity: 0.25,
+  gravity: 0.2,
   lift: -6.5,
   velocity: 0
 };
@@ -26,14 +26,14 @@ let bird = {
 let pipes = [];
 let pipeWidth = 50;
 let gap = 140;
-let pipeFrequency = 180;
+let pipeFrequency = 200;
 let frame = 0;
 let score = 0;
 let isGameOver = false;
 let isFlapping = false;
 let birdAngle = 0;
 
-// Kuşu zıplat
+// Uçuş fonksiyonu
 function flap() {
   if (!isGameOver) {
     bird.velocity = bird.lift;
@@ -41,29 +41,17 @@ function flap() {
   }
 }
 
-// Klavye kontrolü
+// Kontroller
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") flap();
 });
 document.addEventListener("keyup", (e) => {
   if (e.code === "Space") isFlapping = false;
 });
-
-// Fare kontrolü
-canvas.addEventListener("mousedown", () => {
-  flap();
-});
-canvas.addEventListener("mouseup", () => {
-  isFlapping = false;
-});
-
-// Dokunmatik kontrol
-canvas.addEventListener("touchstart", () => {
-  flap();
-});
-canvas.addEventListener("touchend", () => {
-  isFlapping = false;
-});
+canvas.addEventListener("mousedown", () => flap());
+canvas.addEventListener("mouseup", () => { isFlapping = false; });
+canvas.addEventListener("touchstart", () => flap());
+canvas.addEventListener("touchend", () => { isFlapping = false; });
 
 // Oyun bitirme
 function gameOver() {
@@ -107,7 +95,7 @@ function addPipe() {
 function drawPipes() {
   for (let i = 0; i < pipes.length; i++) {
     let p = pipes[i];
-    p.x -= 1.5;
+    p.x -= 1.2;
 
     ctx.fillStyle = "green";
     ctx.fillRect(p.x, 0, pipeWidth, p.top);
@@ -133,27 +121,40 @@ function drawPipes() {
   }
 }
 
-// Oyun döngüsü
+// Ana oyun döngüsü
 function draw() {
   if (isGameOver) return;
 
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
- 
+  // Fizik
+  bird.velocity += bird.gravity;
+  bird.velocity *= 0.99;
+  bird.velocity = Math.min(bird.velocity, 6);
+  bird.y += bird.velocity;
 
+  // Kuşun açısı
+  birdAngle = bird.velocity < 0
+    ? Math.max(birdAngle - 1, -20)
+    : Math.min(birdAngle + 1, 40);
+
+  // Görsel seçimi
   const currentBirdImage = isFlapping ? birdOpen : birdClosed;
 
+  // Kuşu çiz
   ctx.save();
   ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
   ctx.rotate((birdAngle * Math.PI) / 180);
   ctx.drawImage(currentBirdImage, -bird.width / 2, -bird.height / 2, bird.width, bird.height);
   ctx.restore();
 
+  // Yerle çarpışma
   if (bird.y + bird.height > canvas.height || bird.y < 0) {
     gameOver();
     return;
   }
 
+  // Boru üretimi
   frame++;
   if (frame % pipeFrequency === 0) {
     addPipe();
@@ -161,6 +162,7 @@ function draw() {
 
   drawPipes();
 
+  // Skoru yaz
   ctx.fillStyle = "white";
   ctx.font = "30px Arial";
   ctx.textAlign = "left";
