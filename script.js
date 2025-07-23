@@ -18,14 +18,14 @@ let bird = {
   y: 150,
   width: 40,
   height: 40,
-  gravity: 0.15,
+  gravity: 0.1,
   lift: -6.8,
   velocity: 0
 };
 
 let pipes = [];
 let pipeWidth = 50;
-let gap = 140;
+let gap = 160;
 let pipeFrequency = 200;
 let frame = 0;
 let score = 0;
@@ -95,7 +95,7 @@ function addPipe() {
 function drawPipes() {
   for (let i = 0; i < pipes.length; i++) {
     let p = pipes[i];
-    p.x -= 1.2;
+    p.x -= 1.0;
 
     ctx.fillStyle = "green";
     ctx.fillRect(p.x, 0, pipeWidth, p.top);
@@ -130,7 +130,7 @@ function draw() {
   // Fizik
   bird.velocity += bird.gravity;
   bird.velocity *= 0.99;
-  bird.velocity = Math.min(bird.velocity, 6);
+  bird.velocity = Math.min(bird.velocity, 5);
   bird.y += bird.velocity;
 
   // Kuşun açısı
