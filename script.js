@@ -139,15 +139,7 @@ function draw() {
 
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-  // Fizik
-  bird.velocity += bird.gravity;
-  bird.velocity *= 0.98;
-  bird.velocity = Math.min(bird.velocity, 8);
-  bird.y += bird.velocity;
-
-  birdAngle = bird.velocity < 0
-    ? Math.max(birdAngle - 1, -20)
-    : Math.min(birdAngle + 1, 40);
+ 
 
   const currentBirdImage = isFlapping ? birdOpen : birdClosed;
 
